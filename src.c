@@ -66,11 +66,54 @@ float prims_mst(int nodes[], const int size, float g[], int* T){
   return wt;
 }
 
-void select_in(int inds[],float* g){
+float tc(int ni,int count_nb,int *taken_in,float* g){
+  float tc=0;
   int taken[MAX]={0};
-  for(int i=0;i<count_in;i++){
-    int node;
-    inds[i]=node;
+  taken[ni]=1;
+
+  if(taken_in){
+    for(int i=0;i<MAX;i++){
+      taken[i]=taken_in[i];
+    }
+    taken_in[ni]=1;
+  }
+
+  for(int i=0;i<count_nb;i++){
+    int min=INT_MAX;
+    int mi;
+    for(int j=0;j<MAX;j++){
+      if(taken[j]==0 && *(g+MAX*ni+j)<min){
+        min=*(g+MAX*ni+j);
+        mi=j;
+      }
+    }
+    tc+=*(g+MAX*ni+mi);
+    taken[mi]=1; //node mi is a neighbour of ni
+    if(taken_in)
+      taken_in[mi]=1;
+  }
+  return tc;
+}
+
+void select_in(int inds[],float* g){
+  float costs[MAX]; //costs of node i to count_nb nearest nodes
+  int count_nb=(MAX-count_in)/count_in;
+  for(int i=0;i<MAX;i++){
+    costs[i]=tc(i,count_nb,NULL,g);
+  }
+  int taken_in[MAX]={0};
+  //fill inds using costs
+  for(int j=0;j<count_in;j++){
+    int min=INT_MAX;
+    int mon;
+    for(int i=0;i<MAX;i++){
+     if(taken_in[i]==0 && costs[i]<min){
+      min=costs[i];
+      mon=i;
+     }
+    }
+    costs[mon]=tc(mon,count_nb,taken_in,g);
+    inds[j]=mon;
   }
 }
 
@@ -100,8 +143,6 @@ float algo(int* T, float* g, float* totalCost, float* x, float* y){
     *(T+MAX*lf+nin)=*(T+MAX*nin+lf)=1;
   }
   //printf("Original wt: %f\n",wt);
-  wt=hill_climb(inds,wt,T,g,root);
-  printf("After Hill_Climb: %f\n",wt);//test
   return wt;
 }
 
