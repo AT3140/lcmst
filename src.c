@@ -76,23 +76,23 @@ float tc(int ni,int count_nb,int *taken_n,int freeze,float* g){
     for(int i=0;i<MAX;i++){
       taken[i]=taken_n[i];
     }
-    if(freeze==1)
+    if(freeze==1) //freeze is done when ni is the most optimal node at the instant
       taken_n[ni]=1;
   }
 
   for(int i=0;i<count_nb;i++){
     int min=INT_MAX;
-    int mi;
+    int mon;
     for(int j=0;j<MAX;j++){
       if(taken[j]==0 && *(g+MAX*ni+j)<min){
         min=*(g+MAX*ni+j);
-        mi=j;
+        mon=j;
       }
     }
-    tc+=*(g+MAX*ni+mi);
-    taken[mi]=1; //node mi is a neighbour of ni
+    tc+=*(g+MAX*ni+mon);
+    taken[mon]=1; //node mi is a neighbour of ni
     if(taken_n && freeze==1)
-      taken_n[mi]=1;
+      taken_n[mon]=1;
   }
   return tc;
 }
