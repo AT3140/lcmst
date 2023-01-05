@@ -1,0 +1,2 @@
+github repo: "lcmst"
+git remote: "lc_repo"

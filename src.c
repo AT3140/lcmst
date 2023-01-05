@@ -67,16 +67,17 @@ float prims_mst(int nodes[], const int size, float g[], int* T){
   return wt;
 }
 
-float tc(int ni,int count_nb,int *taken_in,float* g){
+float tc(int ni,int count_nb,int *taken_n,int freeze,float* g){
   float tc=0;
   int taken[MAX]={0};
   taken[ni]=1;
 
-  if(taken_in){
+  if(taken_n){
     for(int i=0;i<MAX;i++){
-      taken[i]=taken_in[i];
+      taken[i]=taken_n[i];
     }
-    taken_in[ni]=1;
+    if(freeze==1)
+      taken_n[ni]=1;
   }
 
   for(int i=0;i<count_nb;i++){
@@ -90,8 +91,8 @@ float tc(int ni,int count_nb,int *taken_in,float* g){
     }
     tc+=*(g+MAX*ni+mi);
     taken[mi]=1; //node mi is a neighbour of ni
-    if(taken_in)
-      taken_in[mi]=1;
+    if(taken_n && freeze==1)
+      taken_n[mi]=1;
   }
   return tc;
 }
@@ -100,21 +101,25 @@ void select_in(int inds[],float* g){
   float costs[MAX]; //costs of node i to count_nb nearest nodes
   int count_nb=(MAX-count_in)/count_in;
   for(int i=0;i<MAX;i++){
-    costs[i]=tc(i,count_nb,NULL,g);
+    costs[i]=tc(i,count_nb,NULL,0,g);
   }
-  int taken_in[MAX]={0};
+  int taken_n[MAX]={0};
   //fill inds using costs
   for(int j=0;j<count_in;j++){
     int min=INT_MAX;
     int mon;
     for(int i=0;i<MAX;i++){
-     if(taken_in[i]==0 && costs[i]<min){
+     if(taken_n[i]==0 && costs[i]<min){
       min=costs[i];
       mon=i;
      }
     }
-    costs[mon]=tc(mon,count_nb,taken_in,g);
+    costs[mon]=tc(mon,count_nb,taken_n,1,g);
     inds[j]=mon;
+    //update costs as per new space
+    for(int i=0;i<MAX;i++){
+      costs[i]=tc(i,count_nb,taken_n,0,g);
+    }
   }
 }
 
