@@ -196,23 +196,47 @@ void rep_graph(int*T,float*g,int inds[]){
 
 float hill_climb(int inds[],float wt,int*T,float* g,int root[]){ 
   float bw=computeTreeCost(T,g);
-  for(int i=0;i<count_in;i++){
-    int bn=inds[i];
-    for(int j=0;j<MAX;j++){
-      if(root[j]==root[inds[i]] && inds[i]!=j){
-        inds[i]=j;
-        rep_graph(T,g,inds);
-        float cw=computeTreeCost(T,g);
-        if(cw>bw){ //changes make no improvement => restore
-          inds[i]=bn; 
+
+  const int count_iter=count_in;
+
+  //k th iteration for randomized hill climb
+  for(int k=0;k<count_iter;k++){
+    int r_guide[count_in];
+    int taken[count_in];
+    for(int i=0;i<count_in;i++) taken[i]=0;
+
+    //prepare randomization guide array r_guide[]
+    for(int i=0;i<count_in;i++){
+      int nin; //inds index
+      while(taken[nin=(int)rand()%count_in]!=0);
+      taken[nin]=1;
+      r_guide[i]=nin;
+    }
+
+    //run hillclimb on r_guide
+    for(int i=0;i<count_in;i++){
+      int index=r_guide[i];
+      int bn=inds[index];
+      int cn=inds[index];
+
+      for(int j=0;j<MAX;j++){
+        if(root[j]==root[cn] && cn!=j){
+          inds[index]=j;
           rep_graph(T,g,inds);
-        }
-        else{ //changes accepted
-          bn=j;
-          bw=computeTreeCost(T,g);
+          float cw=computeTreeCost(T,g);
+          if(cw>bw){ //changes make no improvement => restore
+            inds[index]=bn; 
+            rep_graph(T,g,inds);
+          }
+          else{ //changes accepted
+            bn=j;
+            bw=computeTreeCost(T,g);
+          }
         }
       }
+
     }
+
   }
 
   return bw;
@@ -247,6 +271,7 @@ float algo(int* T, float* g, float* totalCost, float* x, float* y){
 }
 
 int main(){
+  srand(time(NULL));
   float x[MAX],y[MAX], totalCost[MAX];
   float g[MAX*MAX];
   int T[MAX*MAX]; 
