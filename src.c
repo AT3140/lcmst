@@ -6,7 +6,7 @@
 #include <sys/time.h>
 
 #define MAX 250
-#define FILENAME "./inst/lcmste250.1"
+#define FILENAME "./inst/lcmste250.10"
 #define TARGET_FILE "2501.txt"
 
 const int count_in=(int)((float)MAX*(0.1));  //count of internal nodes
@@ -197,7 +197,8 @@ void rep_graph(int*T,float*g,int inds[]){
 float hill_climb(int inds[],float wt,int*T,float* g,int root[]){ 
   float bw=computeTreeCost(T,g);
 
-  const int count_iter=count_in;
+  const int count_iter=MAX;
+  int lasti=0;
 
   //k th iteration for randomized hill climb
   for(int k=0;k<count_iter;k++){
@@ -213,6 +214,7 @@ float hill_climb(int inds[],float wt,int*T,float* g,int root[]){
       r_guide[i]=nin;
     }
 
+    float ciw=bw;  //current iteration initial w
     //run hillclimb on r_guide
     for(int i=0;i<count_in;i++){
       int index=r_guide[i];
@@ -237,7 +239,12 @@ float hill_climb(int inds[],float wt,int*T,float* g,int root[]){
 
     }
 
+    if(bw<ciw)
+      lasti=k+1;
+
   }
+
+  printf("Last improvement at iteration number @ %d\n",lasti);
 
   return bw;
 }
