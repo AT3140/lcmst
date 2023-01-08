@@ -6,9 +6,9 @@
 #include <time.h>
 #include <sys/time.h>
 
-#define MAX 50
-#define FILENAME "./inst/lcmste50.14"
-#define TARGET_FILE "501.txt"
+#define MAX 100
+#define FILENAME "./inst/lcmste100.7"
+#define TARGET_FILE "1001.txt"
 
 const int count_in=(int)((float)MAX*(0.1));  //count of internal nodes
 void initgraph(float *g, float totalCost[MAX], FILE *fp1, float x[MAX], float y[MAX]);
