@@ -6,9 +6,9 @@
 #include <time.h>
 #include <sys/time.h>
 
-#define MAX 100
-#define FILENAME "./inst/lcmste100.7"
-#define TARGET_FILE "1001.txt"
+#define MAX 300
+#define FILENAME "./inst/lcmstr300.1.txt"
+#define TARGET_FILE "300.txt"
 
 const int count_in=(int)((float)MAX*(0.1));  //count of internal nodes
 void initgraph(float *g, float totalCost[MAX], FILE *fp1, float x[MAX], float y[MAX]);
@@ -123,10 +123,10 @@ void select_in(int inds[],float* g){
   }
 }
 
-//finds euclidean distance between points (x1,x2) and (y1,y2)
-float distance(float x1,float y1, float x2, float y2){
-  return sqrt( ((x1-x2)*(x1-x2)) + ((y1-y2)*(y1-y2)) );
-}
+// // //finds euclidean distance between points (x1,x2) and (y1,y2)
+// float distance(float x1,float y1, float x2, float y2){
+//   return sqrt( ((x1-x2)*(x1-x2)) + ((y1-y2)*(y1-y2)) );
+// }
 
 float algo(int* T, float* g, float* totalCost, float* x, float* y){
   int root[MAX]; 
@@ -201,7 +201,7 @@ void initgraph(float *g, float totalCost[MAX], FILE *fp1, float x[MAX], float y[
   for (i=0; i<MAX; totalCost[i++]=0.0);
 
 // Euclidean Instances
-///*
+/*
   //fscanf(fp1,"%f",&nodes); //uncomment this for lcmstr files
   for (i=0;i<MAX;i++)
     fscanf(fp1,"%f %f",&x[i], &y[i]);
@@ -214,20 +214,20 @@ void initgraph(float *g, float totalCost[MAX], FILE *fp1, float x[MAX], float y[
       else
         *(g+MAX*i+j) = *(g+MAX*j+i) = sqrt( ((x[j]-x[i])*(x[j]-x[i])) + ((y[j]-y[i])*(y[j]-y[i])) );
     } // Each g(i,j) is assigned the euclidean distance between nodes i and j
-//*/
+*/
 
 // Random Instances
-/*
+///*
      fscanf(fp1,"%d",&nodes);
 
      for (i=0;i<MAX;i++) {
          for (j=0;j<MAX;j++) {
 
              fscanf(fp1,"%f",&val);
-             *(g+MAX*i+j) = val;
+             *(g+MAX*i+j)=val;
          }
      }
-*/
+//*/
 
   for (i=0;i<MAX;i++)
     for (j=0;j<MAX;j++) {
