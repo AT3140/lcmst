@@ -6,8 +6,9 @@
 #include <sys/time.h>
 
 #define MAX 250
-#define FILENAME "./inst/lcmste250.1"
+#define FILENAME "./inst/lcmste250.3"
 #define TARGET_FILE "2501.txt"
+#define rep(i,a,b) for(int i=a;i<b;i++)
 
 const int count_in=(int)((float)MAX*(0.1));  //count of internal nodes
 void initgraph(float *g, float totalCost[MAX], FILE *fp1, float x[MAX], float y[MAX]);
@@ -71,31 +72,30 @@ float prims_mst(int nodes[], const int size, float g[], int* T){
   return wt;
 }
 
-//finds euclidean distance between points (x1,x2) and (y1,y2)
+//finds euclidean distance between points (x1,x2) and (y1,y2); used here in select_in()
 float distance(float x1,float y1, float x2, float y2){
   return sqrt( ((x1-x2)*(x1-x2)) + ((y1-y2)*(y1-y2)) );
 }
 
 //select internal nodes
 void select_in(int inds[], segment s[], int root[], float x[], float y[]){
-  //for(int i=0; i<count_in;i++){printf("%d ",s[i].n);}
-  //calc avg of all nodes of a segment
-  float ax[count_in]; //avg over x coord
-  float ay[count_in]; //avg over y coord
-  for(int i=0;i<count_in;i++){
-    ax[i]=0; ay[i]=0;
+  float ax[count_in], ay[count_in];
+  //write ax and ay from axy.txt
+  FILE *f=fopen("axy.txt","r");
+  rep(i,0,count_in){
+    fscanf(f,"%f",ax+i);
+    fscanf(f,"%f",ay+i);
   }
-  for(int i=0;i<MAX;i++){
-    int si=root[i];
-    ax[si]+=x[i];
-    ay[si]+=y[i];
+  fclose(f);
+  //write root from root.txt
+  f=fopen("root.txt","r");
+  rep(i,0,MAX){
+    fscanf(f,"%d",root+i);
   }
-  for(int i=0;i<count_in;i++){
-    ax[i]/=s[i].n; 
-    ay[i]/=s[i].n;
-  }
-  
+  fclose(f);
+
   //find nearest nodes to each segment's central point (as determined via averaging)
+  //identify internal nodes in inds[]
   float da[count_in];
   for(int i=0; i<count_in; i++)
     da[i]=INT_MAX; //stores 
@@ -108,145 +108,11 @@ void select_in(int inds[], segment s[], int root[], float x[], float y[]){
   }
 }
 
-//is node i eligible to be part of the segment s
-int is_eligible(segment s, int i,float x[],float y[]){
-  //is node i eligible to be part of the segment i.e. are the coordinates of node i within the boundaries of segment s
-  //printf("y:%f uy:%f\n",y[i],s.oy);
-  if(!(x[i]>=s.ox && x[i]<=s.ox+s.ux)){return 0;}
-  else if(!(y[i]>=s.oy && y[i]<=s.oy+s.uy)){return 0;}
-  else return 1;
-}
-
-//bubbling a segment into two
-void bubble(segment s[],int ri, int ci, int root[], float x[], float y[]){ //ci: child index ri: richest seg index
-  //specify new boundaries
-  int hor=0; //(hor==1) ? bubble vertically : b horizontally
-  if(s[ri].ux<s[ri].uy){hor=1;}
-  if(hor==0){
-    s[ci].ox=s[ri].ox+s[ri].ux/2;
-    s[ci].oy=s[ri].oy;
-    s[ci].ux=s[ri].ux/2;
-    s[ci].uy=s[ri].uy;
-    s[ri].ux/=2;
-  }
-  else{
-    s[ci].oy=s[ri].oy+s[ri].uy/2;
-    s[ci].ox=s[ri].ox;
-    s[ci].uy=s[ri].uy/2;
-    s[ci].ux=s[ri].ux;
-    s[ri].uy/=2;
-  }
-  //modify root and segment array (n) accordingly)
-  for(int i=0; i<MAX; i++){
-    if(is_eligible(s[ci],i,x,y)==1){
-      //printf("d");//test
-      s[root[i]].n--;
-      s[ci].n++;
-      root[i]=ci;
-    }
-  }
-}
-
-//partition the unit square into segments equal to number of internal nodes 
-void partition(segment s[], int root[],float x[], float y[]){  
-  for(int i=0 ;i<MAX; i++){root[i]=0;}
-  s[0].n=MAX;
-  s[0].ox=0;s[0].oy=0;s[0].ux=1;s[0].uy=1;
-  for(int i=1;i<count_in;i++){
-    s[i].n=0;
-    s[i].ox=0;s[i].oy=0;s[i].ux=0;s[i].uy=0;
-  }
-  for(int ci=1; ci<count_in; ci++){
-    //determine rich segment
-    int ri; //richest segment index
-    int max=INT_MIN;
-    for(int i=0; i<count_in; i++){
-      if(s[i].n>max){
-        ri=i;
-        max=s[i].n;
-      }
-    }
-    //bubble from rich segment to current segment
-    bubble(s,ri,ci,root,x,y);
-  }
-}
-
-void rep_graph(int*T,float*g,int inds[]){
-  //reset T
-  for(int i=0;i<MAX*MAX; i++){
-    *(T+i)=0;
-  }
-  //reconnect internal nodes
-  prims_mst(inds,count_in,g,T);
-
-  //join leaves
-  for(int lf=0;lf<MAX;lf++){//for all leaves
-    float min=INT_MAX;
-    int nin;//nearest internal node
-    for(int i=0; i<count_in; i++){
-      int in=inds[i];
-      if(*(g+MAX*lf+in)<min){
-        nin=in;
-        min=*(g+MAX*lf+in);
-      }
-    }
-    *(T+MAX*lf+nin)=*(T+MAX*nin+lf)=1;
-  }  
-}
-
-float hill_climb(int inds[],float wt,int*T,float* g,int root[]){ 
-  float bw=computeTreeCost(T,g);
-
-  const int count_iter=count_in;
-
-  //k th iteration for randomized hill climb
-  for(int k=0;k<count_iter;k++){
-    int r_guide[count_in];
-    int taken[count_in];
-    for(int i=0;i<count_in;i++) taken[i]=0;
-
-    //prepare randomization guide array r_guide[]
-    for(int i=0;i<count_in;i++){
-      int nin; //inds index
-      while(taken[nin=(int)rand()%count_in]!=0);
-      taken[nin]=1;
-      r_guide[i]=nin;
-    }
-
-    //run hillclimb on r_guide
-    for(int i=0;i<count_in;i++){
-      int index=r_guide[i];
-      int bn=inds[index];
-      int cn=inds[index];
-
-      for(int j=0;j<MAX;j++){
-        if(root[j]==root[cn] && cn!=j){
-          inds[index]=j;
-          rep_graph(T,g,inds);
-          float cw=computeTreeCost(T,g);
-          if(cw>bw){ //changes make no improvement => restore
-            inds[index]=bn; 
-            rep_graph(T,g,inds);
-          }
-          else{ //changes accepted
-            bn=j;
-            bw=computeTreeCost(T,g);
-          }
-        }
-      }
-
-    }
-
-  }
-
-  return bw;
-}
-
 float algo(int* T, float* g, float* totalCost, float* x, float* y){
   segment s[count_in];
   int root[MAX]; 
   int inds[count_in]; //stands for internal nodes
-  partition(s,root,x,y); //nodes distributed among these segments
+  //partition(s,root,x,y); //nodes distributed among these segments
   select_in(inds,s,root,x,y); //indexes of internal nodes stored in inds array
   //implement Prims on inds and obtain an mst
   float wt=prims_mst(inds,count_in,g,T);
@@ -265,8 +131,8 @@ float algo(int* T, float* g, float* totalCost, float* x, float* y){
     *(T+MAX*lf+nin)=*(T+MAX*nin+lf)=1;
   }
   //printf("Original wt: %f\n",wt);
-  wt=hill_climb(inds,wt,T,g,root);
-  printf("After Hill_Climb: %f\n",wt);//test
+  //wt=hill_climb(inds,wt,T,g,root);
+  //printf("After Hill_Climb: %f\n",wt);//test
   return wt;
 }
 
