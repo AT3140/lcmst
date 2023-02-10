@@ -6,10 +6,20 @@
 #include <sys/time.h>
 #include <conio.h>
 
-#define MAX 50
 #define rep(i,a,b) for(int i=a;i<b;i++)
-#define FILENAME "./inst/lcmste50.3"
-#define TARGET_FILE "501.txt"
+
+#define MAX 250
+#define FILENAME "./inst/lcmste250.5"
+#define TARGET_FILE "2501.txt"
+
+#define KMeansClusterCenters "km_centres.txt"
+#define KMeansLabels "k_labels.txt"
+#define CURR_GRAPH "curr_graph.txt"
+#define CURR_INDS "curr_inds.txt"
+#define KM_INDS "kmeans_inds.txt"
+#define SGMT './segment.txt'
+#define CNTRDS "./centroids.txt"
+#define segment_no 0
 
 const int count_in=(int)((float)MAX*(0.1));  //count of internal nodes
 void initgraph(float *g, float totalCost[MAX], FILE *fp1, float x[MAX], float y[MAX]);
@@ -17,6 +27,8 @@ float computeTreeCost(int *T, float *g);
 static int compare (const void * x, const void * y);
 void cpu_time(double *t); 
 void totxt(int *T,float*g);
+void xytotxt(const char*,float x[],float y[],int n);
+void nodestotxt(const char *s,int nodes[], float x[],float y[],int n);
 
 typedef struct segment{
   int n; //no of elements in the array pointed to by ptr
@@ -92,11 +104,28 @@ void select_in(int inds[], segment s[], int root[], float x[], float y[]){
     ax[si]+=x[i];
     ay[si]+=y[i];
   }
+  
   for(int i=0;i<count_in;i++){
     ax[i]/=s[i].n; 
     ay[i]/=s[i].n;
   }
-  
+  //printing axy in txt
+  printf("\nSegment Centroids to txt");
+  xytotxt("centroids.txt",ax,ay,count_in);
+
+  //printing segment in txt
+  //int segment_no=0;
+  float sx[s[segment_no].n],sy[s[segment_no].n];
+  int p=0;
+  rep(i,0,MAX){
+    if(root[i]==segment_no){
+      sx[p]=x[i];
+      sy[p]=y[i]; p++;
+    }
+  }
+  printf("\nNodes from segment %d to txt",segment_no);
+  xytotxt("segment.txt",sx,sy,s[segment_no].n); 
+
   //find nearest nodes to each segment's central point (as determined via averaging)
   float da[count_in];
   for(int i=0; i<count_in; i++)
@@ -113,16 +142,28 @@ void select_in(int inds[], segment s[], int root[], float x[], float y[]){
 //is node i eligible to be part of the segment s
 int is_eligible(segment s, int i,float x[],float y[]){
   //is node i eligible to be part of the segment i.e. are the coordinates of node i within the boundaries of segment s
-  //printf("y:%f uy:%f\n",y[i],s.oy);
-  if(!(x[i]>=s.ox && x[i]<=s.ox+s.ux)){return 0;}
-  else if(!(y[i]>=s.oy && y[i]<=s.oy+s.uy)){return 0;}
-  else return 1;
+  
+  // if(!(x[i]>=s.ox && x[i]<=s.ox+s.ux)){return 0;}
+  // else if(!(y[i]>=s.oy && y[i]<=s.oy+s.uy)){return 0;}
+  // else return 1;
+  
+  int c1=0,c2=0;
+  if(x[i]>=s.ox && x[i]<=(s.ox+s.ux)){
+    c1=1;
+  }
+  if(y[i]>=s.oy && y[i]<=(s.oy+s.uy)){
+    c2=1;
+  }
+  if(c1==1 && c2==1){
+    return 1;
+  }
+  else return 0;
 }
 
 //bubbling a segment into two
 void bubble(segment s[],int ri, int ci, int root[], float x[], float y[]){ //ci: child index ri: richest seg index
   //specify new boundaries
-  int hor=0; //(hor==1) ? bubble vertically : b horizontally
+  int hor=0; //(hor==1) ? bubble hor : b vert
   if(s[ri].ux<s[ri].uy){hor=1;}
   if(hor==0){
     s[ci].ox=s[ri].ox+s[ri].ux/2;
@@ -173,72 +214,25 @@ void partition(segment s[], int root[],float x[], float y[]){
   }
 }
 
-void rep_graph(int*T,float*g,int inds[]){
-  //reset T
-  for(int i=0;i<MAX*MAX; i++){
-    *(T+i)=0;
-  }
-  //reconnect internal nodes
-  prims_mst(inds,count_in,g,T);
-
-  //join leaves
-  for(int lf=0;lf<MAX;lf++){//for all leaves
-    float min=INT_MAX;
-    int nin;//nearest internal node
-    for(int i=0; i<count_in; i++){
-      int in=inds[i];
-      if(*(g+MAX*lf+in)<min){
-        nin=in;
-        min=*(g+MAX*lf+in);
-      }
-    }
-    *(T+MAX*lf+nin)=*(T+MAX*nin+lf)=1;
-  }  
-}
-
-float hill_climb(int inds[],float wt,int*T,float* g,int root[]){ 
-  float bw=computeTreeCost(T,g);
-  for(int i=0;i<count_in;i++){
-    int bn=inds[i];
-    for(int j=0;j<MAX;j++){
-      if(root[j]==root[inds[i]] && inds[i]!=j){
-        inds[i]=j;
-        rep_graph(T,g,inds);
-        float cw=computeTreeCost(T,g);
-        if(cw>bw){ //changes make no improvement => restore
-          inds[i]=bn; 
-          rep_graph(T,g,inds);
-        }
-        else{ //changes accepted
-          bn=j;
-          bw=computeTreeCost(T,g);
-        }
-      }
-    }
-  }
-
-  return bw;
-}
-
-void inds_from_axy(int inds[], int root[], float* x, float* y){
-  float ax[count_in], ay[count_in];
-  //write ax and ay from axy.txt
-  FILE *f=fopen("axy.txt","r");
+void inds_from_kmeans(int inds[], int root[], float* x, float* y){
+  float ax[count_in], ay[count_in]; 
+  //Store kmeans-cluster-centers in ax and ay
+  FILE *f=fopen(KMeansClusterCenters,"r");
   rep(i,0,count_in){
     fscanf(f,"%f",ax+i);
     fscanf(f,"%f",ay+i);
   }
   fclose(f);
-  //write root from root.txt
-  f=fopen("root.txt","r");
+  //kmeans labels in root[]
+  f=fopen(KMeansLabels,"r");
   rep(i,0,MAX){
     fscanf(f,"%d",root+i);
   }
   fclose(f);
 
-  //find nearest nodes to each segment's central point (as determined via averaging)
-  //identify internal nodes in inds[]
-  float da[count_in];
+  //find nearest nodes to each kmeans-cluster-centers
+  //internal nodes in inds[]
+  float da[count_in]; //smallest distances obtained from cluster centers
   for(int i=0; i<count_in; i++)
     da[i]=INT_MAX; //stores 
   for(int i=0;i<MAX;i++){
@@ -256,35 +250,28 @@ float algo(int* T, float* g, float* totalCost, float* x, float* y){
   int root[MAX]; 
   int inds[count_in]; //stands for internal nodes
   partition(s,root,x,y); //nodes distributed among these segments
+  printf("Partitioned");
   select_in(inds,s,root,x,y); //indexes of internal nodes stored in inds array
   
-  //input coord of inds in inds.txt file
-  f=fopen("inds.txt","w");
-  for(int i=0;i<count_in;i++)
-    fprintf(f,"%f %f\n",*(x+inds[i]),*(y+inds[i]));
-  fclose(f);
-  //input coord of all nodes in temp.txt file
-  f=fopen("temp.txt","w");
-  for(int i=0;i<MAX;i++)
-    fprintf(f,"%f %f\n",*(x+i),*(y+i));
-  fclose(f);
+  //input coord of inds in txt file
+  printf("\ninds to txt");
+  nodestotxt(CURR_INDS,inds,x,y,count_in);
+  //input coord of all nodes in txt file
+  printf("\ngraph to txt");
+  xytotxt(CURR_GRAPH,x,y,MAX);
 
-  rep(i,0,count_in){
-    printf("%d ",inds[i]);
-  }
-  printf("\n");
-
-  printf("Press any key to continue..\n");getch();
+  printf("\nPress any key to continue..");getch();
   
-  inds_from_axy(inds,root,x,y);
-  rep(i,0,count_in){
-    printf("%d ",inds[i]);
-  }
-  printf("\n");
+  inds_from_kmeans(inds,root,x,y);
+  printf("\ninds updated\ninds to txt");
+
+  nodestotxt(KM_INDS,inds,x,y,count_in);
 
   //implement Prims on inds and obtain an mst
+  printf("\nApplying Prims");
   float wt=prims_mst(inds,count_in,g,T);
   
+  printf("\nJoining nodes");
   for(int lf=0;lf<MAX;lf++){//for all leaves
     float min=INT_MAX;
     int nin;//nearest internal node
@@ -298,9 +285,10 @@ float algo(int* T, float* g, float* totalCost, float* x, float* y){
     wt+=*(g+MAX*lf+nin);
     *(T+MAX*lf+nin)=*(T+MAX*nin+lf)=1;
   }
-  //printf("Original wt: %f\n",wt);
-  wt=hill_climb(inds,wt,T,g,root);
-  printf("After Hill_Climb: %f\n",wt);//test
+  printf("\nMST obtained successfully");
+  printf("\nTree wt: %f",wt);
+  printf("\nTree Cost: %f",computeTreeCost(T,g));
+
   return wt;
 }
 
@@ -317,7 +305,7 @@ int main(){
 
   algo(T,g,totalCost,x,y);
 
-  printf("%f",computeTreeCost(T,g)); 
+  printf("\n%f",computeTreeCost(T,g)); 
   cpu_time(t);
 
   printf("\nTime Taken (ms): %lf",*t);
@@ -447,3 +435,20 @@ void cpu_time(double *t) //milliseconds
 //     *t = (double) ((stop.tv_sec - start.tv_sec)*(int)1e9 + (stop.tv_nsec - start.tv_nsec)*1e-9);
 //   }
 // }
+
+void xytotxt(const char *s,float x[],float y[],int n){
+  FILE *f;
+  f=fopen(s,"w");
+  for(int i=0;i<n;i++){
+    fprintf(f,"%f %f\n",x[i],y[i]);
+  }
+  fclose(f);
+}
+
+void nodestotxt(const char *s,int nodes[], float x[],float y[],int n){
+  FILE *f;
+  f=fopen(s,"w");
+  for(int i=0;i<n;i++)
+    fprintf(f,"%f %f\n",*(x+nodes[i]),*(y+nodes[i]));
+  fclose(f);
+}
