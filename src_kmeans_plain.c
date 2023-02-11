@@ -1,3 +1,5 @@
+//1. python -u "d:\lcmst\kmeans_plain.py"
+//2. cd "d:\lcmst\" ; if ($?) { gcc src_kmeans_plain.c -o src_kmeans_plain } ; if ($?) { .\src_kmeans_plain }
 #include <limits.h>
 #include <stdio.h>
 #include <math.h>
@@ -5,10 +7,13 @@
 #include <time.h>
 #include <sys/time.h>
 
-#define MAX 100
-#define FILENAME "./inst/lcmste100.2"
-#define TARGET_FILE "1001.txt"
+#define MAX 250
+#define FILENAME "./inst/lcmste250.15"
+#define TARGET_FILE "2501.txt"
 #define rep(i,a,b) for(int i=a;i<b;i++)
+
+#define KMeansClusterCenters "km_centres_plain.txt"
+#define KMeansLabels "k_labels_plain.txt"
 
 const int count_in=(int)((float)MAX*(0.1));  //count of internal nodes
 void initgraph(float *g, float totalCost[MAX], FILE *fp1, float x[MAX], float y[MAX]);
@@ -80,15 +85,15 @@ float distance(float x1,float y1, float x2, float y2){
 //select internal nodes
 void select_in(int inds[], segment s[], int root[], float x[], float y[]){
   float ax[count_in], ay[count_in];
-  //write ax and ay from axy.txt
-  FILE *f=fopen("axy.txt","r");
+  //write cluster-centers in ax and ay 
+  FILE *f=fopen(KMeansClusterCenters,"r");
   rep(i,0,count_in){
     fscanf(f,"%f",ax+i);
     fscanf(f,"%f",ay+i);
   }
   fclose(f);
-  //write root from root.txt
-  f=fopen("root.txt","r");
+  //obtain labels in root
+  f=fopen(KMeansLabels,"r");
   rep(i,0,MAX){
     fscanf(f,"%d",root+i);
   }

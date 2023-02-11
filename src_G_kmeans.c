@@ -1,3 +1,5 @@
+// cd "d:\lcmst\" ; if ($?) { gcc src_G_kmeans.c -o src_G_kmeans } ; if ($?) { .\src_G_kmeans }
+// python -u "d:\lcmst\kmeans_G.py"
 #include <limits.h>
 #include <stdio.h>
 #include <math.h>
@@ -9,7 +11,7 @@
 #define rep(i,a,b) for(int i=a;i<b;i++)
 
 #define MAX 250
-#define FILENAME "./inst/lcmste250.5"
+#define FILENAME "./inst/lcmste250.15"
 #define TARGET_FILE "2501.txt"
 
 #define KMeansClusterCenters "km_centres.txt"
