@@ -8,7 +8,7 @@
 #include <sys/time.h>
 
 #define MAX 250
-#define FILENAME "./inst/lcmste250.15"
+#define FILENAME "./inst/lcmste250.7"
 #define TARGET_FILE "2501.txt"
 #define rep(i,a,b) for(int i=a;i<b;i++)
 

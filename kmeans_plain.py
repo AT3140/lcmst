@@ -4,7 +4,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 
-CURR_GRAPH="./inst/lcmste250.15"
+CURR_GRAPH="./inst/lcmste250.7"
 MAX=250
 KMeansClusterCenters="km_centres_plain.txt"
 KMeansLabels="k_labels_plain.txt"

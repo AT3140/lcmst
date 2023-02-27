@@ -10,9 +10,9 @@
 
 #define rep(i,a,b) for(int i=a;i<b;i++)
 
-#define MAX 250
-#define FILENAME "./inst/lcmste250.15"
-#define TARGET_FILE "2501.txt"
+#define MAX 50
+#define FILENAME "./inst/lcmste50.15"
+#define TARGET_FILE "501.txt"
 
 #define KMeansClusterCenters "km_centres.txt"
 #define KMeansLabels "k_labels.txt"
