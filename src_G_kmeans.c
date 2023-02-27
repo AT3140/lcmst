@@ -10,9 +10,9 @@
 
 #define rep(i,a,b) for(int i=a;i<b;i++)
 
-#define MAX 50
-#define FILENAME "./inst/lcmste50.15"
-#define TARGET_FILE "501.txt"
+#define MAX 250
+#define FILENAME "./inst/lcmste250.15"
+#define TARGET_FILE "2501.txt"
 
 #define KMeansClusterCenters "km_centres.txt"
 #define KMeansLabels "k_labels.txt"
@@ -262,36 +262,37 @@ float algo(int* T, float* g, float* totalCost, float* x, float* y){
   printf("\ngraph to txt");
   xytotxt(CURR_GRAPH,x,y,MAX);
 
-  printf("\nPress any key to continue..");getch();
+  //printf("\nPress any key to continue..");getch();
   
-  inds_from_kmeans(inds,root,x,y);
-  printf("\ninds updated\ninds to txt");
+  // inds_from_kmeans(inds,root,x,y);
+  // printf("\ninds updated\ninds to txt");
 
-  nodestotxt(KM_INDS,inds,x,y,count_in);
+  // nodestotxt(KM_INDS,inds,x,y,count_in);
 
-  //implement Prims on inds and obtain an mst
-  printf("\nApplying Prims");
-  float wt=prims_mst(inds,count_in,g,T);
+  // //implement Prims on inds and obtain an mst
+  // printf("\nApplying Prims");
+  // float wt=prims_mst(inds,count_in,g,T);
   
-  printf("\nJoining nodes");
-  for(int lf=0;lf<MAX;lf++){//for all leaves
-    float min=INT_MAX;
-    int nin;//nearest internal node
-    for(int i=0; i<count_in; i++){
-      int in=inds[i];
-      if(*(g+MAX*lf+in)<min){
-        nin=in;
-        min=*(g+MAX*lf+in);
-      }
-    }
-    wt+=*(g+MAX*lf+nin);
-    *(T+MAX*lf+nin)=*(T+MAX*nin+lf)=1;
-  }
-  printf("\nMST obtained successfully");
-  printf("\nTree wt: %f",wt);
-  printf("\nTree Cost: %f",computeTreeCost(T,g));
+  // printf("\nJoining nodes");
+  // for(int lf=0;lf<MAX;lf++){//for all leaves
+  //   float min=INT_MAX;
+  //   int nin;//nearest internal node
+  //   for(int i=0; i<count_in; i++){
+  //     int in=inds[i];
+  //     if(*(g+MAX*lf+in)<min){
+  //       nin=in;
+  //       min=*(g+MAX*lf+in);
+  //     }
+  //   }
+  //   wt+=*(g+MAX*lf+nin);
+  //   *(T+MAX*lf+nin)=*(T+MAX*nin+lf)=1;
+  // }
+  // printf("\nMST obtained successfully");
+  // printf("\nTree wt: %f",wt);
+  // printf("\nTree Cost: %f",computeTreeCost(T,g));
 
-  return wt;
+  //return wt;
+  return 0;
 }
 
 int main(){
@@ -300,19 +301,19 @@ int main(){
   int T[MAX*MAX]; 
   FILE *fp1;  
   double *t=(double*)malloc(sizeof(double));
-  cpu_time(NULL);
+  //cpu_time(NULL);
   initgraph(g,totalCost,fp1,x,y);
 
   printf("n=%d and l=%d\n",MAX,MAX-count_in);
 
   algo(T,g,totalCost,x,y);
 
-  printf("\n%f",computeTreeCost(T,g)); 
-  cpu_time(t);
+  //printf("\n%f",computeTreeCost(T,g)); 
+  //cpu_time(t);
 
-  printf("\nTime Taken (ms): %lf",*t);
+  //printf("\nTime Taken (ms): %lf",*t);
 
-  totxt(T,g);
+  //totxt(T,g);
 
   return 0;
 }

@@ -12,15 +12,19 @@ CURR_GRAPH="curr_graph.txt"
 CURR_INDS="curr_inds.txt"
 KMeansClusterCenters="km_centres.txt"
 KMeansLabels="k_labels.txt"
-MAX=50
+MAX=250
 
 G=np.loadtxt(CURR_GRAPH,dtype='float')
 I=np.loadtxt(CURR_INDS,dtype='float')
-n_runs=10
+#n_iter=math.floor(MAX)
+count_in=math.floor(MAX*0.1)
+n_iter=math.floor(MAX*6)
+n_perturb=math.ceil(count_in/5)
+print(n_iter)
 
 # def connect_G(G,I):    
 
-count_in=math.floor(MAX*0.1)
+
 
 #np.savetxt(KMeansLabels,kmeans.labels_,fmt='%d')
 #np.savetxt(KMeansClusterCenters,kmeans.cluster_centers_,fmt='%.7f')
@@ -106,15 +110,46 @@ def computeTreeCost(T):
             cost += T[i][j]
     return cost
 
+import numpy as np
+
+def perturb(inds, G, nm):
+    """
+    This function takes in a list of 5 integers `inds` in the range [0, 50),
+    a NumPy array `G` of shape 50,2 containing coordinates of 50 points, and
+    an integer `nm`. It randomly picks `nm` elements in `inds` and replaces
+    them with any other valid integer such that each integer in `inds` is
+    always unique. The function then returns a NumPy array of shape 5,2
+    containing coordinates extracted from `G` corresponding to integers in
+    `inds` in the same order.
+    """
+    
+    # Randomly choose `nm` indices to replace
+    indices_to_replace = np.random.choice(count_in, nm, replace=False)
+    
+    # Replace the chosen indices with new integers
+    for i in indices_to_replace:
+        new_int = np.random.choice([x for x in range(MAX) if x not in inds])
+        inds[i] = new_int
+    
+    # Extract the corresponding coordinates from G
+    coords = G[inds]
+    
+    return coords
+
 min_w=sys.maxsize
-for i in range(1):
+last_improv=-1 #test
+for i in range(n_iter):
     kmeans= KMeans(n_clusters=count_in,init=I,n_init=1).fit(G)
     inds=kcc_to_inds(kmeans.cluster_centers_,G)
     T=buildTree(inds,G) #T is Adj Matrix as 2d numpy array 
-    np.savetxt("T.txt",T,fmt='%f')
     w=computeTreeCost(T)
-    print(w)
+    #print(w)
     if(w<min_w):
         min_w=w
-        
+        np.savetxt("T.txt",T,fmt='%f')
+        last_improv=i #test
+    I=perturb(inds,G,1) #given inds and Graph coord, change 1 of the inds and return inds coord 
+
+print("Tree Size: "+str(MAX))
+print("Last Improvement: "+str(last_improv))
 print("MST cost: "+str(min_w))
