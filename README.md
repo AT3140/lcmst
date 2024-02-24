@@ -54,3 +54,10 @@ Time Complexity : <i>O(n<sup>2</sup>)</i>
 <li>Visited Arrays</li>
 <li>Structures</li>
 </ul>
+
+<h3>References</h3>
+
+[1] Julstrom, B.A., 2004. Codings and operators in two genetic algorithms for the leaf-constrained minimum spanning tree problem. International Journal of Applied Mathematics and Computer Science, 14(3), pp.385-396.
+
+
+[2] Prakash, V.P. and Patvardhan, C., 2020. Novel Heuristics for the Euclidean Leaf-Constrained Minimum Spanning Tree Problem. SN Computer Science, 1, pp.1-19.
