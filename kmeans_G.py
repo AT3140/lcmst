@@ -20,6 +20,7 @@ I=np.loadtxt(CURR_INDS,dtype='float')
 count_in=math.floor(MAX*0.1)
 n_iter=math.floor(MAX*6)
 n_perturb=math.ceil(count_in/5)
+# n_perturb=1
 print(n_iter)
 
 # def connect_G(G,I):    
