@@ -47,7 +47,7 @@ Time Complexity : <i>O(n<sup>2</sup>)</i>
 <li>Pass these Internal Nodes as seeds to the Kmeans algorithm in the pipeline.</li>
 <li>Connect the Internal Nodes, as obtained in step 4., by Prim's Algorithm.</li>
 <li>Connect rest of the nodes to the nearest internal nodes thus completing the Spanning Tree as required.</li>
-<li>Introduce perturbations by swapping one of the leaf nodes randomly with an internal node and repeating step 4-7. Record the best Minimum Spanning Tree obtained each iteration.</li>
+<li>Introduce perturbations by swapping one of the leaf nodes randomly with an internal node and repeating step 4-7. Record the best Minimum Spanning Tree obtained with each iteration.</li>
 </ol>
 
 <h3>References</h3>
