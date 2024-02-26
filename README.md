@@ -39,15 +39,15 @@ Time Complexity : <i>O(n<sup>2</sup>)</i>
 <ol type='a'>
 <li>The initial search space is divided into two halves vertically. Label the nodes as per locality.</li>
 <li>Split the region with the greatest population along the shorter side and relabel the nodes accordingly.</li>
-<li>Repeat step 2 till the number of regions(partitons) is equal to the number of internal nodes required.</li>
+<li>Repeat step 2 till the number of regions(partitions) is equal to the number of internal nodes required.</li>
 </ol>
 </li>
 <li>Obtain the centroids of each region by averaging the coordinates of the respective member nodes.</li> 
 <li>Identify nodes nearest to the centroids as identified in previous step as Internal Nodes.</li>
 <li>Pass these Internal Nodes as seeds to the Kmeans algorithm in the pipeline.</li>
-<li>Connect the Internal Nodes, as obtained in step 4., by Prim's Algorithm.</li>
+<li>Connect the Internal Nodes, as obtained in step 4, by Prim's Algorithm.</li>
 <li>Connect rest of the nodes to the nearest internal nodes thus completing the Spanning Tree as required.</li>
-<li>Introduce perturbations by swapping one of the leaf nodes randomly with an internal node and repeating step 4-7. Record the best Minimum Spanning Tree obtained with each iteration.</li>
+<li>Introduce perturbations by swapping one of the leaf nodes randomly with an internal node and repeating step 4-7 and record the best Minimum Spanning Tree obtained with each iteration.</li>
 </ol>
 
 <h3>References</h3>
