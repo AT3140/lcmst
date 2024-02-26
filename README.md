@@ -35,15 +35,19 @@ Adjacency Matrix Representation of the graph G wherein each entry A[ i ][ j ] re
 Time Complexity : <i>O(n<sup>2</sup>)</i>
 
 <ol>
-<li>The search space is divided into two halves vertically. Labelling the left and the right region as 0 and 1 respectively.</li>
-<li>Split the side with the greatest population across the longer side.</li>
-<li>Repeat step 2 till the number of regions is equal to the number of internal nodes required.</li>
+<li>Iteratively partition the search space such that the nodes are fairly distributed into regions.
+<ol type='a'>
+<li>The initial search space is divided into two halves vertically. Label the nodes as per locality.</li>
+<li>Split the region with the greatest population along the shorter side and relabel the nodes accordingly.</li>
+<li>Repeat step 2 till the number of regions(partitons) is equal to the number of internal nodes required.</li>
+</ol>
+</li>
 <li>Obtain the centroids of each region by averaging the coordinates of the respective member nodes.</li> 
-<li>Identify nodes nearest to respective centroids identified in step 4 as Internal Nodes.</li>
+<li>Identify nodes nearest to the centroids as identified in previous step as Internal Nodes.</li>
 <li>Pass these Internal Nodes as seeds to the Kmeans algorithm in the pipeline.</li>
-<li>Connect the Internal Nodes by Prim's Algorithm.</li>
-<li>Connect rest of the nodes to the nearest internal nodes each thus completing the Spanning Tree as required.</li>
-<li>Introduce perturbations by swapping one of the leaf nodes in the search space with an internal node and repeating step 6-8. Record the best Minimum Spanning Tree obtained so far with each iteration.</li>
+<li>Connect the Internal Nodes, as obtained in step 4., by Prim's Algorithm.</li>
+<li>Connect rest of the nodes to the nearest internal nodes thus completing the Spanning Tree as required.</li>
+<li>Introduce perturbations by swapping one of the leaf nodes randomly with an internal node and repeating step 4-7. Record the best Minimum Spanning Tree obtained each iteration.</li>
 </ol>
 
 <h3>References</h3>
